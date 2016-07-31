@@ -7,23 +7,26 @@ import secrets
 
 def save_to_db(page_id_name, t, pages_coll, posts_coll):
     graph = facebook.GraphAPI(access_token=t, version='2.5')
-    page = graph.get_object(page_id_name, fields="id,about,name,fan_count")    # posts.limit(100){type,message, id}
+    page = graph.get_object(page_id_name, fields="id,about,name,fan_count,picture{url}")    # posts.limit(100){type,message, id}
     pages_coll.create_index('id', unique=True)
     pages_coll.update_one({'id': page['id']}, {'$set': page}, upsert=True)
 
-    post_rec = graph.get_object(page_id_name, fields="id,name,posts.limit(100){type,message,created_time,id}")
+    fileds = 'id,name,posts.limit(100){created_time,picture,message,shares,link,likes.limit(0).summary(true)}'
+    post_rec = graph.get_object(page_id_name, fields=fileds)
     posts_coll.create_index('id', unique=True)
     posts_coll.create_index('created_time') # posts.create_index('published_at')
     posts_coll.update_one({'id': post_rec['id']}, {'$set': post_rec}, upsert=True)  #
 
     return "{}".format(page['id']), "{}".format(page['fan_count'])
-
+# id,name,about,picture,posts{created_time,picture,message,shares,link,likes.limit(0).summary(true)}
 client = pymongo.MongoClient()
 db = client.get_database('socialagg')
 pages = db.get_collection('pages')
+pages = pages.drop()
+pages = db.get_collection('pages')
 posts = db.get_collection('posts')
-# posts = posts.drop()
-# posts = db.get_collection('posts')
+posts = posts.drop()
+posts = db.get_collection('posts')
 with open("TOKEN.txt") as f:
     TOKEN = f.read().strip()
 
@@ -58,4 +61,7 @@ for URL in sys.argv[1:]:
 #      "japanika.net",
 #      "TelAvivGlobalCity",
 #     "MarilynMonroe"
+#       "lauraprepon.official"
 #      ]
+# https://www.facebook.com/lauraprepon.official/ https://www.facebook.com/MarilynMonroe https://www.facebook.com/kimkardashian https://www.facebook.com/RocketKingGnR/ https://www.facebook.com/victoriabeckham https://www.facebook.com/beckham
+

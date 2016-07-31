@@ -13,7 +13,7 @@ sOld, sNew = set(), set()
 for post in posts.find():
     c = 0
     [sOld.add(i['id']) for i in post['posts']['data']]
-    new_posts = graph.get_object(post['id'], fields="id,name,posts.limit(100){type,message,created_time,id}")
+    new_posts = graph.get_object(post['id'], fields="id,name,posts.limit(100){message,shares,type,id,created_time,likes}")
     for i in new_posts['posts']['data']:
         sNew.add(i['id'])  # 1, 2, 3 , 4, 5
         if i['id'] in sOld:
